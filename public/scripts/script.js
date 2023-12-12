@@ -148,6 +148,7 @@ function kitchensSort() {
       button.addEventListener('click', () => {
         document.querySelector('.js-kitchens-sort.active').classList.remove('active');
         button.classList.add('active');
+        document.querySelector('.js-sort-mobile-button[data-type="' + button.dataset.type + '"]').click();
         changeKitchensVisibility();
       });
     });
@@ -158,8 +159,8 @@ function kitchensSortMobile() {
   let mobileTypeSort = document.querySelectorAll('.js-sort-mobile-button');
   if (mobileSortButton) {
     mobileSortButton.addEventListener('click', () => {
-      // console.log(mobileSortButton.parentNode)
       mobileSortButton.parentNode.classList.toggle('active');
+      changeKitchensVisibility();
     });
   }
   if (mobileTypeSort) {
@@ -171,6 +172,9 @@ function kitchensSortMobile() {
         if (mobileSortButton.parentNode.classList.contains('active')) {
           mobileSortButton.parentNode.classList.remove('active');
         }
+        // console.log(button.dataset.type)
+        document.querySelector('.js-kitchens-sort[data-type="' + button.dataset.type + '"]').click();
+        changeKitchensVisibility();
       });
     });
   }
