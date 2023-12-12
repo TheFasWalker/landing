@@ -8,15 +8,34 @@ function headerMenu() {
     });
   }
 }
+function addSityToForms() {
+  let sityButton = document.querySelector('.js-header-location-button_dextop');
+  let sityName = sityButton.querySelector('span').innerHTML.trim();
+  let formSityInputs = document.querySelectorAll('.js-form-sity');
+  formSityInputs.forEach(input => {
+    input.value = sityName;
+  });
+}
 function headerLocation() {
-  let locationButton = document.querySelector('.js-header-location-button');
-  let locationItemsWrapper = document.querySelector('.js-header-sity-list-wrapper');
-  let sityButtons = document.querySelectorAll('.js-header-sity-choose');
-  document.querySelector('.js-form-sity').value = locationButton.querySelector('span').innerHTML.trim();
+  let locationButton = document.querySelector('.js-header-location-button_dextop');
+  let locationItemsWrapper = document.querySelector('.js-header-sity-list-wrapper_dextop');
+  let locationItemsWrapperHeight = locationItemsWrapper.querySelector('.header__sity').offsetHeight;
+  let sityButtons = document.querySelectorAll('.js-header-sity-choose_dextop');
+  let locationButtonMobile = document.querySelector('.js-header-location-button_mobile');
+  let locationItemsWrapperMobile = document.querySelector('.js-header-sity-list-wrapper_mobile');
+  let locationItemsWrapperHeightMobile = locationItemsWrapper.querySelector('.header__sity').offsetHeight;
+  let sityButtonsMobile = document.querySelectorAll('.js-header-sity-choose_mobile');
   if (locationButton) {
     locationButton.addEventListener('click', () => {
-      locationButton.classList.toggle('active');
-      locationItemsWrapper.classList.toggle('active');
+      if (locationButton.classList.contains('active')) {
+        locationButton.classList.remove('active');
+        locationItemsWrapper.classList.remove('active');
+        locationItemsWrapper.setAttribute('style', `max-height:0`);
+      } else {
+        locationItemsWrapper.setAttribute('style', `max-height:${locationItemsWrapperHeight}px`);
+        locationButton.classList.add('active');
+        locationItemsWrapper.classList.add('active');
+      }
     });
   }
   if (sityButtons) {
@@ -27,9 +46,36 @@ function headerLocation() {
         locationItemsWrapper.classList.remove('active');
         locationButton.classList.remove('active');
         button.classList.add('header__sity-button_active');
+        addSityToForms();
       });
     });
   }
+  if (locationButtonMobile) {
+    locationButtonMobile.addEventListener('click', () => {
+      if (locationButtonMobile.classList.contains('active')) {
+        locationButtonMobile.classList.remove('active');
+        locationItemsWrapperMobile.classList.remove('active');
+        locationItemsWrapperMobile.setAttribute('style', `max-height:0`);
+      } else {
+        locationItemsWrapperMobile.setAttribute('style', `max-height:${locationItemsWrapperHeight}px`);
+        locationButtonMobile.classList.add('active');
+        locationItemsWrapperMobile.classList.add('active');
+      }
+    });
+  }
+  if (sityButtonsMobile) {
+    sityButtonsMobile.forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelector('.header__sity-button_active').classList.remove('header__sity-button_active');
+        locationButtonMobile.querySelector('span').innerHTML = button.textContent.trim();
+        locationItemsWrapperMobile.classList.remove('active');
+        locationButtonMobile.classList.remove('active');
+        button.classList.add('header__sity-button_active');
+        addSityToForms();
+      });
+    });
+  }
+  addSityToForms();
 }
 function heroAccessoriesFirmSlider() {
   let heroSlider = document.querySelector('.js-hero-slider');
@@ -112,7 +158,7 @@ function kitchensSortMobile() {
   let mobileTypeSort = document.querySelectorAll('.js-sort-mobile-button');
   if (mobileSortButton) {
     mobileSortButton.addEventListener('click', () => {
-      console.log(mobileSortButton.parentNode);
+      // console.log(mobileSortButton.parentNode)
       mobileSortButton.parentNode.classList.toggle('active');
     });
   }
@@ -174,7 +220,8 @@ function reviewsSwiper() {
 function callDesinerPopup(element) {
   let popup = document.querySelector('.js-consult-popup');
   popup.classList.add('active');
-  document.querySelector('body').setAttribute('style', "overflow:hidden");
+  blockBodyScroll();
+  missckick(element);
   if (element.dataset.kitchenname != undefined) {
     popup.querySelector('form').insertAdjacentHTML('afterbegin', `<input type="text" name="kitchenName" value="${element.dataset.kitchenname}" class="hiddenInput">`);
   } else {
@@ -186,7 +233,8 @@ function callDesinerPopup(element) {
 function sizeCalculationPopUp(element) {
   let popup = document.querySelector('.js-calculation-popup');
   popup.classList.add('active');
-  document.querySelector('body').setAttribute('style', "overflow:hidden");
+  blockBodyScroll();
+  missckick();
   if (element.dataset.kitchenname != undefined) {
     popup.querySelector('form').insertAdjacentHTML('afterbegin', `<input type="text" name="kitchenName" value="${element.dataset.kitchenname}" class="hiddenInput">`);
   } else {
@@ -196,13 +244,24 @@ function sizeCalculationPopUp(element) {
   }
 }
 function closePopupWindow() {
-  if (document.querySelector('.js-kitchen-preview').classList.contains('active')) {
-    document.querySelector('.js-kitchen-preview').classList.remove('active');
+  let kitchenPreview = document.querySelector('.js-kitchen-preview');
+  let formPopup = document.querySelector('.js-popup-wrapper.active');
+  let videoPopup = document.querySelector('.js-popup-wrapper-single-video');
+  if (kitchenPreview.classList.contains('active') && formPopup) {
+    formPopup.classList.remove('active');
+    return;
   }
-  if (document.querySelector('.js-popup-wrapper.active')) {
-    document.querySelector('.js-popup-wrapper.active').classList.remove('active');
+  if (kitchenPreview.classList.contains('active')) {
+    kitchenPreview.classList.remove('active');
   }
-  document.querySelector('body').removeAttribute('style');
+  if (formPopup) {
+    formPopup.classList.remove('active');
+  }
+  if (videoPopup.classList.contains('active')) {
+    document.querySelector('.js-popup-wrapper-single-video.active').querySelector('video').src = '';
+    document.querySelector('.js-popup-wrapper-single-video.active').classList.remove('active');
+  }
+  removeBodyScroll();
 }
 function slideButton(elementNode) {
   function closePopup() {
@@ -215,9 +274,11 @@ function slideButton(elementNode) {
     });
   }
   document.querySelector('.js-kitchen-preview').classList.add('active');
-  document.querySelector('body').setAttribute('style', "overflow:hidden");
+  // document.querySelector('body').setAttribute('style', "overflow:hidden")
+  blockBodyScroll();
   let parentNode = elementNode.closest('.kitchen');
   let kitchenName = parentNode.querySelector('.js-kitchen-name').innerHTML;
+  let kitchenCost = parentNode.querySelector('.js-kitchen-cost').innerHTML;
   let kitchenType = parentNode.querySelector('.js-kitchen-type').innerHTML;
   let kitchenSize = parentNode.querySelector('.js-kitchen-size').innerHTML;
   let kitchenGuaranty = parentNode.querySelector('.js-kitchen-guaranty').innerHTML;
@@ -245,6 +306,7 @@ function slideButton(elementNode) {
     }
   });
   document.querySelector('.js-kitchen-preview-name').textContent = kitchenName;
+  document.querySelector('.js-kitchen-preview-cost').textContent = kitchenCost;
   document.querySelector('.js-kitchen-preview-type').textContent = kitchenType;
   document.querySelector('.js-kitchen-preview-size').textContent = kitchenSize;
   document.querySelector('.js-kitchen-preview-frame').textContent = kitchenFrame;
@@ -252,7 +314,12 @@ function slideButton(elementNode) {
   document.querySelector('.js-kitchen-preview-furniture').textContent = kitchenFasades;
   document.querySelector('.js-kitchen-preview-tabletop').textContent = kitchenTableTop;
   document.querySelector('.js-kitchen-preview-guaranty').textContent = kitchenGuaranty;
-  document.querySelector('.js-kitchen-preview-installment-plan-per-month').textContent = kitchenInstallmentPlanPerMonth;
+  if (kitchenInstallmentPlanPerMonth === "от 0 Р/мес.") {
+    document.querySelector('.js-kitchen-preview-installment-plan-per-month').parentElement.style.display = "none";
+  } else {
+    document.querySelector('.js-kitchen-preview-installment-plan-per-month').parentElement.style.display = "flex";
+    document.querySelector('.js-kitchen-preview-installment-plan-per-month').textContent = kitchenInstallmentPlanPerMonth;
+  }
   document.querySelector('.js-kitchen-kitchen-installment-plan').textContent = kitchenInstallmentPlan;
   document.querySelectorAll('.js-kitchen-preview-buttons').forEach(button => {
     button.dataset.kitchenname = `${kitchenName}`;
@@ -264,16 +331,140 @@ function slideButton(elementNode) {
     }
   });
 }
+function validateQuizeItem() {
+  let quizeLabels = document.querySelectorAll('.quize-form__inputs label');
+  quizeLabels.forEach(label => {
+    label.onchange = () => {
+      label.closest('.quize-form__wrapper').querySelector('.js-quize-next').removeAttribute('disabled');
+    };
+  });
+}
+function quizeSlider(quiseNode) {
+  let quizeNextButtons = quiseNode.querySelectorAll('.js-quize-next');
+  quizeNextButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      button.closest('.quize-form__wrapper').classList.add('quize-form__wrapper_passed');
+      button.closest('.quize-form__wrapper').nextElementSibling.classList.add('quize-form__wrapper_active');
+    });
+  });
+}
+function videoSlider() {
+  if (document.querySelector('.js-video-slider')) {
+    new Swiper('.js-video-slider', {
+      breakpoints: {
+        800: {
+          slidesPerView: 3.2,
+          spaceBetween: 20
+        },
+        600: {
+          slidesPerView: 2.2,
+          spaceBetween: 15
+        },
+        0: {
+          slidesPerView: 1.2,
+          spaceBetween: 10
+        }
+      },
+      navigation: {
+        nextEl: '.js-videos-button_next',
+        prevEl: '.js-videos-button_prev'
+      }
+    });
+  }
+}
+function openSingleVideoInPopUp() {
+  let singleVideoButtons = document.querySelectorAll('.js-single-video');
+  let singleVideoPopup = document.querySelector('.js-popup-wrapper-single-video');
+  if (singleVideoButtons.length) {
+    singleVideoButtons.forEach(singleVideoButton => {
+      singleVideoButton.addEventListener('click', function () {
+        let videoUrl = singleVideoButton.dataset.url;
+        singleVideoPopup.querySelector('video').src = videoUrl;
+        singleVideoPopup.classList.add('active');
+        blockBodyScroll();
+        missckick();
+      });
+    });
+  }
+}
+function popUpVideoSlider() {
+  let videoPopUpButtons = document.querySelectorAll('.js-video-button');
+  let videoSliderPopup = document.querySelector('.js-popup-wrapper-slider-video');
+  videoPopUpButtons.forEach(videoButton => {
+    videoButton.addEventListener('click', function () {
+      videoSliderPopup.classList.add('active');
+      // document.querySelector('body').setAttribute('style', "overflow:hidden")
+      blockBodyScroll(scrollWidth);
+      videoPopUpButtons.forEach(videoPopUpButton => {
+        videoSliderPopup.querySelector('.swiper-wrapper').insertAdjacentHTML('afterbegin', ` <div class="swiper-slide"> <video controls="controls" src="${videoPopUpButton.dataset.url}"></video></div>`);
+        // console.log(videoPopUpButton.dataset.url)
+      });
+    });
+  });
+
+  new Swiper('.js-popup-video-slider', {
+    navigator: {
+      nextEl: '.js-popup-swiper-next',
+      ptevEl: '.js-popup-swiper-prev'
+    },
+    slidesPerView: 1.2,
+    loop: true,
+    spaceBetween: 10
+  });
+}
+function blockBodyScroll() {
+  let div = document.createElement('div');
+  div.style.overflowY = 'scroll';
+  div.style.width = '50px';
+  div.style.height = '50px';
+  document.body.append(div);
+  let scrollWidth = div.offsetWidth - div.clientWidth;
+  div.remove();
+  document.querySelector('body').setAttribute('style', `overflow:hidden; padding-right:${scrollWidth}px`);
+  document.querySelector('.header').setAttribute('style', `padding-right:${scrollWidth}px`);
+  document.querySelector('.js-close-kitchen-info-popup.js-popup-close').setAttribute('style', `right:${scrollWidth}px`);
+}
+function removeBodyScroll() {
+  console.log('remove');
+  document.querySelector('body').removeAttribute('style');
+  document.querySelector('.header').removeAttribute('style');
+}
+function missckick() {
+  const div = document.querySelector('.popup__wrapper.active .popup__container');
+  div && document.querySelector('.popup__wrapper.active').addEventListener('click', e => {
+    if (!e.composedPath().includes(div)) {
+      closePopupWindow();
+    }
+  });
+}
 document.addEventListener('DOMContentLoaded', function () {
   let desinerCallBackButtons = document.querySelectorAll('.js-consult-call-back-popup');
   let sizeCalculationButtons = document.querySelectorAll('.js-size-calculation-popup');
   let closePopupButtons = document.querySelectorAll('.js-popup-close');
   let slideButtons = document.querySelectorAll('.js-kitechen-preview');
+  let quzeForms = document.querySelectorAll('.js-quize-form');
+  document.querySelectorAll('a[href^="#"').forEach(link => {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      let href = this.getAttribute('href').substring(1);
+      const scrollTarget = document.getElementById(href);
+      const topOffset = document.querySelector('.header').offsetHeight;
+      const elementPosition = scrollTarget.getBoundingClientRect().top;
+      const offsetPosition = elementPosition - topOffset;
+      window.scrollBy({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    });
+  });
   slideButtons.forEach(button => {
     button.addEventListener('click', () => {
       slideButton(button);
     });
   });
+  // popUpVideoSlider()
+  openSingleVideoInPopUp();
+  videoSlider();
   headerMenu();
   headerLocation();
   heroAccessoriesFirmSlider();
@@ -282,6 +473,7 @@ document.addEventListener('DOMContentLoaded', function () {
   kitchensSortMobile();
   howToContact();
   reviewsSwiper();
+  validateQuizeItem();
   if (desinerCallBackButtons.length) {
     desinerCallBackButtons.forEach(desinerButton => {
       desinerButton.addEventListener('click', () => {
@@ -292,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (sizeCalculationButtons.length) {
     sizeCalculationButtons.forEach(calculationButton => {
       calculationButton.addEventListener('click', () => {
-        console.log(calculationButton);
+        // console.log(calculationButton)
         sizeCalculationPopUp(calculationButton);
       });
     });
@@ -302,9 +494,14 @@ document.addEventListener('DOMContentLoaded', function () {
       closeButton.addEventListener('click', closePopupWindow);
     });
   }
+  if (quzeForms) {
+    quzeForms.forEach(quzeForm => {
+      quizeSlider(quzeForm);
+    });
+  }
   document.addEventListener("keydown", e => {
     if (e.code == "Escape") {
-      console.log('esc');
+      // console.log('esc')
       closePopupWindow();
     }
   });
